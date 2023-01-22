@@ -40,7 +40,7 @@ def detect_updates_all():
             name = acquire_names[i][0] 
             if acquire_chknumbers[i][0] == 1:
                 if url.startswith('https://nuchs.blackboard.com/webapps/blackboard/content') or url.startswith('https://nuchs.blackboard.com/webapps/blackboard/execute'):
-                    #try:
+                    try:
                         options = Options()
                         options.add_argument('--headless')
                         driver = webdriver.Chrome(ChromeDriverManager().install(), options=options)                            
@@ -96,9 +96,9 @@ def detect_updates_all():
                                 timeout=10
                             )
                         driver.close()        
-                    #except:
-                        #print('error')
-                        #driver.close()       
+                    except:
+                        print('error')
+                        driver.close()       
                 else:
                     pass
             else:
