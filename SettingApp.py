@@ -2,10 +2,12 @@ import tkinter as tk
 from tkinterdnd2 import DND_TEXT, TkinterDnD
 import sqlite3
 import webbrowser
+from tkinter import messagebox
 
 conn = sqlite3.connect('url.db')
 c = conn.cursor()
-c.execute('''CREATE TABLE IF NOT EXISTS url (id integer PRIMARY KEY AUTOINCREMENT, chk_number integer, name text, url text, chk_comits integer);''')
+c.execute('''CREATE TABLE IF NOT EXISTS url (id integer PRIMARY KEY AUTOINCREMENT,
+            chk_number integer, name text, url text, chk_comits integer);''')
 c.execute('select count(*) from url')
 count = c.fetchone()
 while count[0] < 30:
@@ -13,10 +15,9 @@ while count[0] < 30:
         c.execute("INSERT INTO url(chk_number,name,url,chk_comits) VALUES(1,'','',1)")
         conn.commit()
         c.execute('select count(*) from url')
-        count = c.fetchone()
+        count = c.fetchone()        
     except:
         print('保存できませんでした')
-        conn.close()
 if c.execute('''select trim(replace(url, ' ', '_')) from url'''):    
     acquire_entries = c.fetchall()
 if c.execute('''select trim(replace(name, ' ', '_')) from url'''):    
@@ -24,8 +25,26 @@ if c.execute('''select trim(replace(name, ' ', '_')) from url'''):
 if c.execute('SELECT chk_number FROM url'):
     acquire_chknumbers = c.fetchall()  
 if c.execute('SELECT chk_comits FROM url'):
-    acquire_chkcomits = c.fetchall()      
+    acquire_chkcomits = c.fetchall()   
 table_name = 'url'  
+
+conn = sqlite3.connect('url2.db')
+c = conn.cursor()
+c.execute('''CREATE TABLE IF NOT EXISTS url2 (id integer PRIMARY KEY AUTOINCREMENT, email text, password text, email2 text, password2 text);''')
+c.execute('select count(*) from url2')
+count = c.fetchone()
+while count[0] < 1:
+    try:
+        c.execute("INSERT INTO url2(email,password,email2,password2) VALUES('','','','')")
+        conn.commit()
+        c.execute('select count(*) from url2')
+        count = c.fetchone()        
+    except:
+        print('保存できませんでした2')
+conn.commit()
+conn.close()
+table_name2 = 'url2'
+
 
 # Tkinter お決まりフレーズ
 class App(TkinterDnD.Tk) :
@@ -33,10 +52,111 @@ class App(TkinterDnD.Tk) :
         super().__init__()    
 
         # タイトルとウィンドウサイズ
-        self.title('Blackbord「連絡事項」「教材」更新通知アプリ')
+        self.title('設定フォーム－Blackbord「連絡事項」「教材」更新通知アプリ－')
         self.resizable(0, 0)
         self.geometry('780x760+0+0')
         self.configure(bg='snow') 
+
+        self.men = tk.Menu(self, background='#003898', tearoff=0) 
+        self.config(menu=self.men)
+        menu_file = tk.Menu(self, tearoff=0, activebackground='sky blue', activeforeground='black')             
+        self.men.add_cascade(label='必須', menu=menu_file)  
+        def subscribe_form():
+            def keep_login_elem2():
+                getry1 = entry1_change.get() 
+                getry2 = entry2_change.get()       
+                try:
+                    conn = sqlite3.connect('url2.db')
+                    c = conn.cursor()
+                    c.execute("UPDATE %s SET email=? WHERE id=?" % table_name2,(getry1, 1))
+                    c.execute("UPDATE %s SET password=? WHERE id=?" % table_name2,(getry2, 1))
+                    conn.commit()           
+                    conn.close()               
+                    messagebox.showinfo('', 'stuアカウントを登録しました') 
+                    sub_win.destroy()
+                except:
+                    messagebox.showerror('エラー', 'アカウントを保存できませんでした')     
+            def pass_disp():
+                getvar = keep_button_var.get()
+                if getvar == True:
+                    entry2_change.configure(show='')
+                else:
+                    entry2_change.configure(show='・')            
+            sub_win = tk.Toplevel()
+            sub_win.resizable(0, 0)
+            sub_win.geometry("400x200+560+250")
+            sub_win.title('stuアカウント登録フォーム－Blackbord「連絡事項」「教材」更新通知アプリ－')
+            sub_win.configure(bg='snow')         
+            label1_change = tk.Label(sub_win, text='ID', width=10, bg='snow')        
+            label2_change = tk.Label(sub_win, text='パスワード', width=10, bg='snow')        
+            entry1_change = tk.Entry(sub_win, width=30)
+            entry2_change = tk.Entry(sub_win, show='・', width=30)
+            conn = sqlite3.connect('url2.db')
+            c = conn.cursor()
+            if c.execute('''select trim(replace(email, ' ', '_')) from url2'''):    
+                acquire_email = c.fetchone()
+            if c.execute('''select trim(replace(password, ' ', '_')) from url2'''):    
+                acquire_pass = c.fetchone()             
+            entry1_change.insert(0, acquire_email[0])
+            entry2_change.insert(0, acquire_pass[0])
+            keep_button = tk.Button(sub_win, width=7, text='保存', command=keep_login_elem2) 
+            keep_button_var = tk.BooleanVar()
+            keep_button_chk = tk.Checkbutton(sub_win, command=pass_disp, text='パスワードを表示する', bg='snow', activebackground='snow', variable=keep_button_var, onvalue=True, offvalue=False)        
+            label1_change.place(x=75,y=10)
+            label2_change.place(x=90,y=70)        
+            entry1_change.place(x=105,y=30)
+            entry2_change.place(x=105,y=90)
+            keep_button.place(x=230,y=150)
+            keep_button_chk.place(x=100,y=110)  
+        menu_file.add_command(label='stuアカウント登録', command=subscribe_form)               
+        def subscribe_form2():
+            def keep_login_elem2():
+                getry1 = entry1_change.get() 
+                getry2 = entry2_change.get()       
+                try:
+                    conn = sqlite3.connect('url2.db')
+                    c = conn.cursor()
+                    c.execute("UPDATE %s SET email2=? WHERE id=?" % table_name2,(getry1, 1))
+                    c.execute("UPDATE %s SET password2=? WHERE id=?" % table_name2,(getry2, 1))
+                    conn.commit()           
+                    conn.close()               
+                    messagebox.showinfo('', '教育用アカウントを登録しました') 
+                    sub_win.destroy()
+                except:
+                    messagebox.showerror('エラー', 'アカウントを保存できませんでした')     
+            def pass_disp2():
+                getvar = keep_button_var.get()
+                if getvar == True:
+                    entry2_change.configure(show='')
+                else:
+                    entry2_change.configure(show='・')            
+            sub_win = tk.Toplevel()
+            sub_win.resizable(0, 0)
+            sub_win.geometry("400x200+560+250")
+            sub_win.title('教育用アカウント登録フォーム－Blackbord「連絡事項」「教材」更新通知アプリ－')
+            sub_win.configure(bg='snow')         
+            label1_change = tk.Label(sub_win, text='ID', width=10, bg='snow')        
+            label2_change = tk.Label(sub_win, text='パスワード', width=10, bg='snow')        
+            entry1_change = tk.Entry(sub_win, width=30)
+            entry2_change = tk.Entry(sub_win, show='・', width=30)
+            conn = sqlite3.connect('url2.db')
+            c = conn.cursor()
+            if c.execute('''select trim(replace(email2, ' ', '_')) from url2'''):    
+                acquire_email = c.fetchone()
+            if c.execute('''select trim(replace(password2, ' ', '_')) from url2'''):    
+                acquire_pass = c.fetchone()             
+            entry1_change.insert(0, acquire_email[0])
+            entry2_change.insert(0, acquire_pass[0])
+            keep_button = tk.Button(sub_win, width=7, text='保存', command=keep_login_elem2) 
+            keep_button_var = tk.BooleanVar()
+            keep_button_chk = tk.Checkbutton(sub_win, command=pass_disp2, text='パスワードを表示する', bg='snow', activebackground='snow', variable=keep_button_var, onvalue=True, offvalue=False)        
+            label1_change.place(x=75,y=10)
+            label2_change.place(x=90,y=70)        
+            entry1_change.place(x=105,y=30)
+            entry2_change.place(x=105,y=90)
+            keep_button.place(x=230,y=150)
+            keep_button_chk.place(x=100,y=110)                    
+        menu_file.add_command(label='教育用アカウント登録', command=subscribe_form2)                     
                      
         self.FrameWindow = tk.Frame(self, bg='snow')
         self.FrameWindow.place(x=75, y=40) 
@@ -240,6 +360,10 @@ class App(TkinterDnD.Tk) :
     def noti_chk(self, event, id):        
         Getvar = []   
         current = self.indexes.index(id)
+        conn = sqlite3.connect('url.db')
+        c = conn.cursor()
+        c.execute('select name from url')
+        acquire_names = c.fetchall()        
         for current in range(len(self.indexes)) :
             Getvar.append(self.var[current].get())  
         for i in range(30):            
@@ -275,26 +399,26 @@ class App(TkinterDnD.Tk) :
                 self.label_0_comits.after(2000, self.label_0_comits.destroy)              
 
     def keep_chk_comits(self):    
-            conn = sqlite3.connect('url.db')
-            c = conn.cursor()  
-            try:
-                if self.var_comits.get() == '1':
-                    c.execute("UPDATE url SET chk_comits=1 WHERE id=1") 
-                    conn.commit()
-                    conn.close()      
-            except:
-                self.label_1 = tk.Label(self, width=35, text='※ONにできません', bg='snow', fg='red')
-                self.label_1.place(x=295, y=27)   
-                self.label_1.after(2000, self.label_1.destroy) 
-            try:                                            
-                if self.var_comits.get() == '0':      
-                    c.execute("UPDATE url SET chk_comits=0 WHERE id=1")   
-                    conn.commit()
-                    conn.close()   
-            except:
-                self.label_1 = tk.Label(self, width=35, text='※OFFにできません', bg='snow', fg='red')
-                self.label_1.place(x=295, y=27)   
-                self.label_1.after(2000, self.label_1.destroy)    
+        conn = sqlite3.connect('url.db')
+        c = conn.cursor()  
+        try:
+            if self.var_comits.get() == '1':
+                c.execute("UPDATE url SET chk_comits=1 WHERE id=1") 
+                conn.commit()
+                conn.close()      
+        except:
+            self.label_1 = tk.Label(self, width=35, text='※ONにできません', bg='snow', fg='red')
+            self.label_1.place(x=295, y=27)   
+            self.label_1.after(2000, self.label_1.destroy) 
+        try:                                            
+            if self.var_comits.get() == '0':      
+                c.execute("UPDATE url SET chk_comits=0 WHERE id=1")   
+                conn.commit()
+                conn.close()   
+        except:
+            self.label_1 = tk.Label(self, width=35, text='※OFFにできません', bg='snow', fg='red')
+            self.label_1.place(x=295, y=27)   
+            self.label_1.after(2000, self.label_1.destroy)             
 
     def cursor_delete(self, event):   
         if event.widget.get() == '名前を入力してください':     
@@ -415,8 +539,8 @@ class App(TkinterDnD.Tk) :
         self.indexes.insert(next, self.index)
 
         # 再配置
-        self.updateEntries()
+        self.updateEntries()                     
 
 if __name__ == '__main__' :
     app = App()    
-    app.mainloop()     
+    app.mainloop()      
